@@ -469,6 +469,80 @@ body {
 .cc-btn.siho-cb { border:2px solid var(--siho); background:transparent; color:var(--siho); }
 .cc-btn.siho-cb.checked { background:var(--siho); color:white; box-shadow:0 4px 12px rgba(236,72,153,0.4); }
 
+/* 体重入力 */
+.cc-weight-wrap {
+  margin-top:10px; padding-top:10px;
+  border-top:1.5px dashed rgba(236,72,153,0.25);
+}
+.cc-weight-label {
+  font-size:9px; font-weight:800; color:var(--muted);
+  letter-spacing:0.1em; text-transform:uppercase; display:block; margin-bottom:4px;
+}
+.cc-weight-row {
+  display:flex; align-items:center; justify-content:center; gap:4px;
+}
+.cc-weight-input {
+  width:80px; padding:6px 8px; font-size:18px; font-weight:800;
+  font-family:'Pacifico',cursive; text-align:center;
+  border:2px solid rgba(236,72,153,0.3); border-radius:12px;
+  background:white; color:var(--siho-d); outline:none;
+  transition:border-color 0.2s;
+}
+.cc-weight-input:focus { border-color:var(--siho); }
+.cc-weight-input::placeholder { color:#e2b0c8; }
+.cc-weight-kg { font-size:12px; font-weight:800; color:var(--muted); }
+.cc-weight-diff {
+  font-size:10px; font-weight:800; margin-top:4px; min-height:16px;
+}
+
+/* 体重ポップアップ */
+.weight-modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px; opacity:0; transition:opacity 0.3s;
+}
+.weight-modal-overlay.show { opacity:1; }
+.weight-modal {
+  background:white; border-radius:24px; padding:24px 20px;
+  max-width:340px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.2);
+  transform:translateY(20px); transition:transform 0.3s;
+  text-align:center;
+}
+.weight-modal-overlay.show .weight-modal { transform:translateY(0); }
+.wm-icon { font-size:40px; margin-bottom:8px; }
+.wm-title { font-size:16px; font-weight:900; color:var(--text); margin-bottom:4px; }
+.wm-weight { font-family:'Pacifico',cursive; font-size:42px; color:var(--siho); line-height:1.2; }
+.wm-weight-unit { font-size:14px; font-weight:800; color:var(--muted); }
+.wm-diff { font-size:14px; font-weight:800; margin:8px 0; }
+.wm-diff.down { color:#059669; }
+.wm-diff.up { color:#ef4444; }
+.wm-diff.same { color:var(--muted); }
+.wm-trend { font-size:11px; color:var(--muted); font-weight:700; margin:6px 0 12px; }
+.wm-advice {
+  background:linear-gradient(135deg,#fdf2f8,#fce7f3);
+  border:1.5px solid #f9a8d4; border-radius:16px;
+  padding:12px 14px; margin:12px 0;
+  font-size:12px; font-weight:700; color:var(--siho-d);
+  line-height:1.6;
+}
+.wm-history { margin:12px 0; text-align:left; }
+.wm-hist-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:4px 0; font-size:11px; font-weight:700;
+  border-bottom:1px solid var(--border);
+}
+.wm-hist-date { color:var(--muted); }
+.wm-hist-val { color:var(--siho); font-weight:800; }
+.wm-hist-diff { font-size:10px; font-weight:800; min-width:50px; text-align:right; }
+.wm-close {
+  display:block; width:100%; padding:10px; margin-top:12px;
+  font-size:13px; font-weight:800; border:2px solid var(--siho);
+  background:var(--siho); color:white; border-radius:14px;
+  cursor:pointer; font-family:inherit;
+  transition:transform 0.15s;
+}
+.wm-close:active { transform:scale(0.95); }
+
 /* Midnight note */
 .midnight-note { text-align:center; font-size:11px; color:var(--muted); margin-top:12px; font-weight:700; padding:0 16px; }
 
@@ -689,6 +763,14 @@ body {
         <div class="cc-count" id="cc-siho-count">0</div>
         <div class="cc-unit">日達成</div>
         <button class="cc-btn siho-cb" id="cc-siho-btn" onclick="toggleChallenge('siho')">今日できた！</button>
+        <div class="cc-weight-wrap">
+          <label class="cc-weight-label">体重</label>
+          <div class="cc-weight-row">
+            <input class="cc-weight-input" id="cc-weight-input" type="number" step="0.1" placeholder="00.0" inputmode="decimal" onchange="saveWeight(this.value)">
+            <span class="cc-weight-kg">kg</span>
+          </div>
+          <div class="cc-weight-diff" id="cc-weight-diff"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -815,6 +897,20 @@ body {
   </div>
 
   <div class="midnight-note" id="midnight-note"></div>
+
+  <!-- 体重ポップアップ -->
+  <div class="weight-modal-overlay" id="weight-modal" onclick="if(event.target===this)closeWeightModal()">
+    <div class="weight-modal">
+      <div class="wm-icon" id="wm-icon"></div>
+      <div class="wm-title">今日の体重</div>
+      <div><span class="wm-weight" id="wm-weight"></span> <span class="wm-weight-unit">kg</span></div>
+      <div class="wm-diff" id="wm-diff"></div>
+      <div class="wm-trend" id="wm-trend"></div>
+      <div class="wm-advice" id="wm-advice"></div>
+      <div class="wm-history" id="wm-history"></div>
+      <button class="wm-close" onclick="closeWeightModal()">とじる</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -898,26 +994,33 @@ const CHORES = [
   { id: 'yoyoprep',  label: 'yoyo身支度',      icon: '👶', cat: 'SHIHOの毎日タスク' },
   { id: 'yoyodrop',  label: 'yoyoの送り迎え',  icon: '🚌', cat: 'SHIHOの毎日タスク' },
   { id: 'dog',       label: '犬の掃除と餌やり',icon: '🐶', cat: 'SHIHOの毎日タスク' },
+  { id: 'dinner',    label: '平日晩御飯',      icon: '🍚', cat: 'SHIHOの毎日タスク' },
+  // 料理・キッチン
+  { id: 'cooking',   label: '料理',            icon: '🍳', cat: '料理・キッチン' },
+  { id: 'dishes',    label: '皿洗い',          icon: '🍽️', cat: '料理・キッチン' },
+  { id: 'stove',     label: 'コンロ掃除',      icon: '🔥', cat: '料理・キッチン' },
+  { id: 'kitchwipe', label: 'キッチン全体の拭き掃除', icon: '✨', cat: '料理・キッチン' },
+  { id: 'grocery',   label: '食材の買い出し',   icon: '🥦', cat: '料理・キッチン' },
+  // 掃除・洗濯
+  { id: 'bath',      label: 'お風呂掃除',      icon: '🛁', cat: '掃除・洗濯' },
+  { id: 'toilet',    label: 'トイレ掃除',      icon: '🚽', cat: '掃除・洗濯' },
+  { id: 'washroom',  label: '洗面台掃除',      icon: '🪥', cat: '掃除・洗濯' },
+  { id: 'floormop',  label: '床の拭き掃除',    icon: '🧽', cat: '掃除・洗濯' },
+  { id: 'bedding',   label: '寝具の洗濯',      icon: '🛏️', cat: '掃除・洗濯' },
+  // ゴミ・日用品
+  { id: 'trash',     label: 'ゴミ捨て',        icon: '🗑️', cat: 'ゴミ・日用品' },
+  { id: 'trashbag',  label: 'ゴミ袋変える',    icon: '🗑️', cat: 'ゴミ・日用品' },
+  { id: 'supplies',  label: '日用品・消耗品の補充', icon: '🛒', cat: 'ゴミ・日用品' },
+  // yoyoのこと
+  { id: 'bedtime',   label: 'yoyoの寝かしつけ',icon: '🌙', cat: 'yoyoのこと' },
+  { id: 'yoyocare',  label: 'yoyo爪切り・耳掃除などケア', icon: '💅', cat: 'yoyoのこと' },
+  { id: 'yoyohosp',  label: 'yoyo病院の付き添い', icon: '🏥', cat: 'yoyoのこと' },
+  // 犬のこと
+  { id: 'dogwalk',   label: '犬の散歩',        icon: '🦮', cat: '犬のこと' },
+  { id: 'doghouse',  label: '犬小屋の清掃',    icon: '🏠', cat: '犬のこと' },
+  { id: 'vetvisit',  label: '犬 動物病院の付き添い', icon: '🐕‍🦺', cat: '犬のこと' },
   // その他
-  { id: 'cooking',   label: '料理',            icon: '🍳', cat: 'その他' },
-  { id: 'stove',     label: 'コンロ掃除',      icon: '🔥', cat: 'その他' },
-  { id: 'bath',      label: 'お風呂掃除',      icon: '🛁', cat: 'その他' },
-  { id: 'toilet',    label: 'トイレ掃除',      icon: '🚽', cat: 'その他' },
-  { id: 'washroom',  label: '洗面台掃除',      icon: '🪥', cat: 'その他' },
-  { id: 'trash',     label: 'ゴミ捨て',        icon: '🗑️', cat: 'その他' },
-  { id: 'bedtime',   label: 'yoyoの寝かしつけ',icon: '🌙', cat: 'その他' },
-  { id: 'dogwalk',   label: '犬の散歩',        icon: '🦮', cat: 'その他' },
-  { id: 'doghouse',  label: '犬小屋の清掃',    icon: '🏠', cat: 'その他' },
   { id: 'weekend',   label: '休日の企画',      icon: '🗓️', cat: 'その他' },
-  { id: 'supplies',  label: '日用品・消耗品の補充', icon: '🛒', cat: 'その他' },
-  { id: 'bedding',   label: '寝具の洗濯',      icon: '🛏️', cat: 'その他' },
-  { id: 'floormop',  label: '床の拭き掃除',    icon: '🧽', cat: 'その他' },
-  { id: 'kitchwipe', label: 'キッチン全体の拭き掃除', icon: '✨', cat: 'その他' },
-  { id: 'grocery',   label: '食材の買い出し',   icon: '🥦', cat: 'その他' },
-  { id: 'trashbag',  label: 'ゴミ袋変える',    icon: '🗑️', cat: 'その他' },
-  { id: 'yoyocare',  label: 'yoyo爪切り・耳掃除などケア', icon: '💅', cat: 'その他' },
-  { id: 'yoyohosp',  label: 'yoyo病院の付き添い', icon: '🏥', cat: 'その他' },
-  { id: 'vetvisit',  label: '犬 動物病院の付き添い', icon: '🐕‍🦺', cat: 'その他' },
 ];
 
 function getToday() {
@@ -983,26 +1086,27 @@ function getTodayPts(player) {
   }, 0);
 }
 
-function markChore(id, player) {
+function toggleChore(id, player) {
   if (!todayData[id]) todayData[id] = {};
   const cur = todayData[id][player] || 0;
-  todayData[id][player] = cur + 1;
-  if (player === 'ren') totals.ren  += 1;
-  else                  totals.siho += 1;
+  if (cur > 0) {
+    // 取消
+    todayData[id][player] = 0;
+    if (player === 'ren') totals.ren  = Math.max(0, totals.ren  - 1);
+    else                  totals.siho = Math.max(0, totals.siho - 1);
+  } else {
+    // 完了
+    todayData[id][player] = 1;
+    if (player === 'ren') totals.ren  += 1;
+    else                  totals.siho += 1;
+  }
   saveData();
   render();
 }
 
-function unmarkChore(id, player) {
-  if (!todayData[id]) return;
-  const cur = todayData[id][player] || 0;
-  if (cur <= 0) return;
-  todayData[id][player] = cur - 1;
-  if (player === 'ren') totals.ren  = Math.max(0, totals.ren  - 1);
-  else                  totals.siho = Math.max(0, totals.siho - 1);
-  saveData();
-  render();
-}
+// 互換用
+function markChore(id, player) { toggleChore(id, player); }
+function unmarkChore(id, player) { toggleChore(id, player); }
 
 function resetToday() {
   if (!confirm('今日の記録をリセットしますか？')) return;
@@ -1177,7 +1281,7 @@ function render() {
           <span class="chore-icon">${chore.icon}</span>
           <span class="chore-name">${chore.label}</span>
           <button class="btn-player btn-${player}${cnt > 0 ? ' active' : ''}"
-            onclick="${cnt > 0 ? `unmarkChore('${chore.id}','${player}')` : `markChore('${chore.id}','${player}')`}">
+            onclick="toggleChore('${chore.id}','${player}')">
             ${cnt > 0 ? '✓ できた！' : label}
           </button>`;
         col.appendChild(card);
@@ -1187,16 +1291,15 @@ function render() {
     listEl.appendChild(wrap);
   }
 
-  // ─── その他 ───
+  // ─── その他カテゴリ ───
   const cats = [...new Set(CHORES.filter(c => !c.cat.includes('毎日タスク')).map(c => c.cat))];
   cats.forEach(cat => {
     const items = CHORES.filter(c => c.cat === cat);
-    const isOther = cat === 'その他';
     const section = document.createElement('div');
-    section.className = 'chore-category' + (isOther ? ' cat-other' : '');
+    section.className = 'chore-category cat-other';
     const catLabel = document.createElement('div');
     catLabel.className = 'chore-cat-label';
-    catLabel.textContent = isOther ? 'その他（毎日必須ではない）' : cat;
+    catLabel.textContent = cat;
     section.appendChild(catLabel);
     const grid = document.createElement('div');
     grid.className = 'chore-grid';
@@ -1214,11 +1317,11 @@ function render() {
         </div>
         <div class="chore-btns">
           <button class="btn-player btn-ren${renCnt > 0 ? ' active' : ''}"
-            onclick="${renCnt > 0 ? `unmarkChore('${chore.id}','ren')` : `markChore('${chore.id}','ren')`}">
+            onclick="toggleChore('${chore.id}','ren')">
             REN${renCnt > 0 ? ' ✓' : ''}
           </button>
           <button class="btn-player btn-siho${sihoCnt > 0 ? ' active' : ''}"
-            onclick="${sihoCnt > 0 ? `unmarkChore('${chore.id}','siho')` : `markChore('${chore.id}','siho')`}">
+            onclick="toggleChore('${chore.id}','siho')">
             SHIHO${sihoCnt > 0 ? ' ✓' : ''}
           </button>
         </div>`;
@@ -1270,6 +1373,152 @@ function renderChallenge() {
       btnEl.classList.toggle('checked', done);
     }
   });
+  renderWeight();
+}
+
+// ─── Weight functions ────────────────────────────────────────────────────────
+
+function saveWeight(value) {
+  const today = getToday();
+  const v = parseFloat(value);
+  if (isNaN(v) || v <= 0) return;
+  dbSet('weight-' + today, v);
+  let wdates = dbGet('weight-dates') || [];
+  if (!wdates.includes(today)) {
+    wdates.push(today);
+    if (wdates.length > 366) wdates = wdates.slice(-366);
+    dbSet('weight-dates', wdates);
+  }
+  renderWeight();
+  showWeightModal(v);
+}
+
+function getWeightHistory() {
+  const dates = (dbGet('weight-dates') || []).sort();
+  return dates.map(d => ({ date: d, weight: dbGet('weight-' + d) })).filter(x => x.weight);
+}
+
+function renderWeight() {
+  const today = getToday();
+  const input = document.getElementById('cc-weight-input');
+  const diffEl = document.getElementById('cc-weight-diff');
+  if (!input) return;
+
+  const todayW = dbGet('weight-' + today);
+  if (todayW) input.value = todayW;
+
+  const history = getWeightHistory();
+  if (!diffEl) return;
+  if (history.length < 2 || !todayW) { diffEl.textContent = ''; return; }
+
+  const prev = history[history.length - 2];
+  if (!prev) { diffEl.textContent = ''; return; }
+
+  const diff = (todayW - prev.weight).toFixed(1);
+  if (diff > 0) {
+    diffEl.innerHTML = `<span style="color:#ef4444;">前回比 +${diff}kg</span>`;
+  } else if (diff < 0) {
+    diffEl.innerHTML = `<span style="color:#059669;">前回比 ${diff}kg</span>`;
+  } else {
+    diffEl.innerHTML = `<span style="color:var(--muted);">前回比 ±0kg</span>`;
+  }
+}
+
+function showWeightModal(todayW) {
+  const history = getWeightHistory();
+  const modal = document.getElementById('weight-modal');
+
+  // 今日の体重
+  document.getElementById('wm-weight').textContent = todayW.toFixed(1);
+
+  // 前回比
+  const diffEl = document.getElementById('wm-diff');
+  let diff = 0, prevW = null;
+  if (history.length >= 2) {
+    prevW = history[history.length - 2].weight;
+    diff = todayW - prevW;
+    const d = diff.toFixed(1);
+    if (diff > 0) {
+      diffEl.className = 'wm-diff up';
+      diffEl.textContent = `前回比 +${d}kg`;
+    } else if (diff < 0) {
+      diffEl.className = 'wm-diff down';
+      diffEl.textContent = `前回比 ${d}kg`;
+    } else {
+      diffEl.className = 'wm-diff same';
+      diffEl.textContent = '前回と同じ！';
+    }
+  } else {
+    diffEl.className = 'wm-diff same';
+    diffEl.textContent = '初回記録！';
+  }
+
+  // 週間トレンド
+  const trendEl = document.getElementById('wm-trend');
+  const recent7 = history.slice(-7);
+  if (recent7.length >= 3) {
+    const weekDiff = (recent7[recent7.length-1].weight - recent7[0].weight).toFixed(1);
+    const days = recent7.length;
+    trendEl.textContent = `直近${days}日間: ${weekDiff > 0 ? '+' : ''}${weekDiff}kg`;
+  } else {
+    trendEl.textContent = 'データが増えるとトレンドが見えるよ！';
+  }
+
+  // アイコン
+  const iconEl = document.getElementById('wm-icon');
+  if (diff < -0.3) iconEl.textContent = '🎉';
+  else if (diff < 0) iconEl.textContent = '👏';
+  else if (diff === 0 || history.length < 2) iconEl.textContent = '📝';
+  else if (diff <= 0.3) iconEl.textContent = '💭';
+  else iconEl.textContent = '💪';
+
+  // アドバイス
+  const adviceEl = document.getElementById('wm-advice');
+  if (history.length < 2) {
+    adviceEl.textContent = '記録スタート！毎日続けることが大事だよ。明日も記録しよう！';
+  } else if (diff <= -0.5) {
+    adviceEl.textContent = `${Math.abs(diff).toFixed(1)}kg減！すごい！この調子で無理せず続けよう。水分補給も忘れずにね！`;
+  } else if (diff < 0) {
+    adviceEl.textContent = 'ちょっとずつ減ってるね！小さな変化の積み重ねが大切。今日もお疲れさま！';
+  } else if (diff <= 0.3) {
+    adviceEl.textContent = 'ほぼキープ！体重は日々変動するものだから気にしすぎないで。継続が一番大事！';
+  } else if (diff <= 0.8) {
+    adviceEl.textContent = '少し増えたけど大丈夫！水分や食事のタイミングでも変わるよ。明日また頑張ろう！';
+  } else {
+    adviceEl.textContent = '増えちゃったけど、記録してるだけで偉い！一日で戻ることもあるから、焦らずいこう！';
+  }
+
+  // 履歴（直近7日）
+  const histEl = document.getElementById('wm-history');
+  const recent = history.slice(-7).reverse();
+  let histHtml = '';
+  recent.forEach((r, i) => {
+    const [,m,d] = r.date.split('-');
+    let diffStr = '';
+    if (i < recent.length - 1) {
+      const prevR = recent[i + 1].weight;
+      const dd = (r.weight - prevR).toFixed(1);
+      if (dd > 0) diffStr = `<span style="color:#ef4444;">+${dd}</span>`;
+      else if (dd < 0) diffStr = `<span style="color:#059669;">${dd}</span>`;
+      else diffStr = `<span style="color:var(--muted);">±0</span>`;
+    }
+    histHtml += `<div class="wm-hist-row">
+      <span class="wm-hist-date">${parseInt(m)}/${parseInt(d)}</span>
+      <span class="wm-hist-val">${r.weight.toFixed(1)}kg</span>
+      <span class="wm-hist-diff">${diffStr}</span>
+    </div>`;
+  });
+  histEl.innerHTML = histHtml;
+
+  // 表示
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => modal.classList.add('show'));
+}
+
+function closeWeightModal() {
+  const modal = document.getElementById('weight-modal');
+  modal.classList.remove('show');
+  setTimeout(() => { modal.style.display = 'none'; }, 300);
 }
 
 // ─── Wake-up functions ──────────────────────────────────────────────────────
@@ -1509,14 +1758,21 @@ window.markChore = function(id, player, event) {
 const _origRender = render;
 window.render = function() {
   _origRender();
-  // re-bind buttons with event
+  // re-bind buttons with event for confetti
   document.querySelectorAll('.btn-player').forEach(btn => {
     const onclick = btn.getAttribute('onclick');
     if (!onclick) return;
-    btn.setAttribute('onclick', onclick.replace("markChore(", "markChore(") );
     btn.onclick = function(e) {
-      const m = onclick.match(/markChore\('([^']+)','([^']+)'\)/);
-      if (m) window.markChore(m[1], m[2], e);
+      const m = onclick.match(/(?:markChore|toggleChore|unmarkChore)\('([^']+)','([^']+)'\)/);
+      if (m) {
+        const id = m[1], player = m[2];
+        const wasDone = (todayData[id] || {})[player] > 0;
+        toggleChore(id, player);
+        if (!wasDone) {
+          const rect = e.target.getBoundingClientRect();
+          spawnConfetti(rect.left + rect.width/2, rect.top, player === 'ren' ? '#3b82f6' : '#ec4899');
+        }
+      }
     };
   });
 };
