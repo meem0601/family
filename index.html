@@ -890,12 +890,13 @@ function dbGet(key) {
 const CHORES = [
   // RENの毎日タスク
   { id: 'laundry',   label: '洗濯',            icon: '🧺', cat: 'RENの毎日タスク' },
-  { id: 'dishes',    label: '皿洗い',          icon: '🍽️', cat: 'RENの毎日タスク' },
+  { id: 'dishes',    label: '皿洗い',          icon: '🍽️', cat: 'その他' },
   { id: 'vacuum',    label: '掃除機',          icon: '🧹', cat: 'RENの毎日タスク' },
   { id: 'yoyo',      label: 'yoyoの着替え',    icon: '👕', cat: 'RENの毎日タスク' },
   { id: 'yoyobath',  label: 'yoyoのお風呂',    icon: '🚿', cat: 'RENの毎日タスク' },
   // SHIHOの毎日タスク
   { id: 'yoyoprep',  label: 'yoyo身支度',      icon: '👶', cat: 'SHIHOの毎日タスク' },
+  { id: 'yoyodrop',  label: 'yoyoの送り迎え',  icon: '🚌', cat: 'SHIHOの毎日タスク' },
   { id: 'dog',       label: '犬の掃除と餌やり',icon: '🐶', cat: 'SHIHOの毎日タスク' },
   // その他
   { id: 'cooking',   label: '料理',            icon: '🍳', cat: 'その他' },
@@ -914,6 +915,9 @@ const CHORES = [
   { id: 'kitchwipe', label: 'キッチン全体の拭き掃除', icon: '✨', cat: 'その他' },
   { id: 'grocery',   label: '食材の買い出し',   icon: '🥦', cat: 'その他' },
   { id: 'trashbag',  label: 'ゴミ袋変える',    icon: '🗑️', cat: 'その他' },
+  { id: 'yoyocare',  label: 'yoyo爪切り・耳掃除などケア', icon: '💅', cat: 'その他' },
+  { id: 'yoyohosp',  label: 'yoyo病院の付き添い', icon: '🏥', cat: 'その他' },
+  { id: 'vetvisit',  label: '犬 動物病院の付き添い', icon: '🐕‍🦺', cat: 'その他' },
 ];
 
 function getToday() {
@@ -1173,9 +1177,8 @@ function render() {
           <span class="chore-icon">${chore.icon}</span>
           <span class="chore-name">${chore.label}</span>
           <button class="btn-player btn-${player}${cnt > 0 ? ' active' : ''}"
-            onclick="markChore('${chore.id}','${player}')"
-            oncontextmenu="event.preventDefault();unmarkChore('${chore.id}','${player}')">
-            ${cnt > 0 ? '✓' : label}${cnt > 1 ? `<span class="cnt-badge">${cnt}</span>` : ''}
+            onclick="${cnt > 0 ? `unmarkChore('${chore.id}','${player}')` : `markChore('${chore.id}','${player}')`}">
+            ${cnt > 0 ? '✓ できた！' : label}
           </button>`;
         col.appendChild(card);
       });
@@ -1211,14 +1214,12 @@ function render() {
         </div>
         <div class="chore-btns">
           <button class="btn-player btn-ren${renCnt > 0 ? ' active' : ''}"
-            onclick="markChore('${chore.id}','ren')"
-            oncontextmenu="event.preventDefault();unmarkChore('${chore.id}','ren')">
-            REN${renCnt > 1 ? `<span class="cnt-badge">${renCnt}</span>` : ''}
+            onclick="${renCnt > 0 ? `unmarkChore('${chore.id}','ren')` : `markChore('${chore.id}','ren')`}">
+            REN${renCnt > 0 ? ' ✓' : ''}
           </button>
           <button class="btn-player btn-siho${sihoCnt > 0 ? ' active' : ''}"
-            onclick="markChore('${chore.id}','siho')"
-            oncontextmenu="event.preventDefault();unmarkChore('${chore.id}','siho')">
-            SHIHO${sihoCnt > 1 ? `<span class="cnt-badge">${sihoCnt}</span>` : ''}
+            onclick="${sihoCnt > 0 ? `unmarkChore('${chore.id}','siho')` : `markChore('${chore.id}','siho')`}">
+            SHIHO${sihoCnt > 0 ? ' ✓' : ''}
           </button>
         </div>`;
       grid.appendChild(card);
