@@ -206,6 +206,66 @@ body {
 .chore-grid {
   display:grid; grid-template-columns:1fr 1fr; gap:8px;
 }
+
+/* 毎日タスク 2列レイアウト */
+.daily-wrap {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;
+}
+.daily-col { display:flex; flex-direction:column; gap:8px; }
+.daily-col-label {
+  font-size:11px; font-weight:900; letter-spacing:0.08em;
+  text-align:center; padding:6px 0; border-radius:12px; margin-bottom:2px;
+}
+.daily-col-label.ren-label  { color:var(--ren-d);  background:linear-gradient(135deg,#eff6ff,#dbeafe); }
+.daily-col-label.siho-label { color:var(--siho-d); background:linear-gradient(135deg,#fdf2f8,#fce7f3); }
+.daily-card {
+  background:var(--card); border-radius:14px;
+  border:2px solid var(--border);
+  padding:10px 8px 8px; text-align:center;
+  display:flex; flex-direction:column; gap:6px;
+  transition:transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275), border-color 0.2s, box-shadow 0.2s;
+}
+.daily-card:active { transform:scale(0.97); }
+.daily-card.done-ren  { background:linear-gradient(135deg,#eff6ff,#dbeafe); border-color:#93c5fd; box-shadow:0 4px 10px rgba(59,130,246,0.14); }
+.daily-card.done-siho { background:linear-gradient(135deg,#fdf2f8,#fce7f3); border-color:#f9a8d4; box-shadow:0 4px 10px rgba(236,72,153,0.14); }
+.daily-card .chore-icon { font-size:22px; }
+.daily-card .chore-name { font-size:11px; font-weight:800; line-height:1.2; }
+.daily-card .btn-player {
+  width:100%; padding:6px 0; font-size:10px; font-weight:800;
+  border-radius:10px; cursor:pointer; font-family:inherit;
+  transition:transform 0.15s cubic-bezier(0.175,0.885,0.32,1.275), background 0.15s;
+  letter-spacing:0.04em; text-align:center;
+}
+.daily-card .btn-player:active { transform:scale(0.9) !important; }
+
+/* 毎日タスク全完了 虹色 */
+@keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+.daily-col.all-done .daily-col-label {
+  background:linear-gradient(90deg,#f87171,#fb923c,#fbbf24,#34d399,#60a5fa,#a78bfa,#f472b6);
+  background-size:300% 300%;
+  animation:rainbow 3s ease infinite;
+  color:white !important;
+  text-shadow:0 1px 2px rgba(0,0,0,0.2);
+}
+.daily-col.all-done .daily-card {
+  border-color:rgba(251,191,36,0.5);
+  box-shadow:0 4px 16px rgba(251,191,36,0.2);
+}
+
+/* その他カテゴリ */
+.chore-category.cat-other { margin-top:6px; }
+.chore-category.cat-other .chore-cat-label {
+  color:#b0b8c8; font-size:9px;
+}
+.chore-category.cat-other .chore-card {
+  padding:7px 10px 6px; opacity:0.7;
+  border-style:dashed;
+}
+.chore-category.cat-other .chore-icon { font-size:16px; }
+.chore-category.cat-other .chore-name { font-size:11px; }
+.chore-category.cat-other .btn-player { padding:4px 0; font-size:9px; }
+.chore-category.cat-other .chore-card.done-ren,
+.chore-category.cat-other .chore-card.done-siho { opacity:1; }
 .chore-card {
   background:var(--card); border-radius:16px;
   border:2px solid var(--border);
@@ -366,6 +426,49 @@ body {
 .wake-legend span { display:flex; align-items:center; gap:4px; }
 .legend-dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
 
+/* ─── チャレンジ ─── */
+.challenge-wrap {
+  padding:0 16px; margin-bottom:14px;
+  animation: slideUp 0.7s 0.5s ease both;
+}
+.challenge-title {
+  font-size:11px; font-weight:800; color:var(--muted);
+  letter-spacing:0.12em; text-transform:uppercase;
+  margin-bottom:10px;
+  display:flex; align-items:center; gap:8px;
+}
+.challenge-title::after { content:''; flex:1; height:1.5px; background:linear-gradient(90deg,var(--border),transparent); border-radius:1px; }
+.challenge-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.challenge-card {
+  border-radius:20px; padding:14px 12px; text-align:center;
+  border:2.5px solid transparent;
+  transition:transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.challenge-card:active { transform:scale(0.97); }
+.challenge-card.ren-cc  { background:linear-gradient(145deg,#eff6ff,#dbeafe); border-color:#93c5fd; }
+.challenge-card.siho-cc { background:linear-gradient(145deg,#fdf2f8,#fce7f3); border-color:#f9a8d4; }
+.cc-icon { font-size:28px; margin-bottom:4px; }
+.cc-name { font-size:10px; font-weight:900; letter-spacing:0.08em; margin-bottom:2px; }
+.ren-cc .cc-name  { color:var(--ren-d); }
+.siho-cc .cc-name { color:var(--siho-d); }
+.cc-label { font-size:12px; font-weight:800; margin-bottom:8px; }
+.ren-cc .cc-label  { color:var(--ren); }
+.siho-cc .cc-label { color:var(--siho); }
+.cc-count { font-family:'Pacifico',cursive; font-size:36px; line-height:1; }
+.ren-cc .cc-count  { color:var(--ren); }
+.siho-cc .cc-count { color:var(--siho); }
+.cc-unit { font-size:10px; color:var(--muted); font-weight:800; margin-bottom:8px; }
+.cc-btn {
+  display:block; width:100%; padding:8px 0; font-size:11px; font-weight:800;
+  border-radius:12px; cursor:pointer; font-family:inherit; letter-spacing:0.05em;
+  transition:transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275), background 0.15s;
+}
+.cc-btn:active { transform:scale(0.93); }
+.cc-btn.ren-cb  { border:2px solid var(--ren);  background:transparent; color:var(--ren); }
+.cc-btn.ren-cb.checked  { background:var(--ren);  color:white; box-shadow:0 4px 12px rgba(59,130,246,0.4); }
+.cc-btn.siho-cb { border:2px solid var(--siho); background:transparent; color:var(--siho); }
+.cc-btn.siho-cb.checked { background:var(--siho); color:white; box-shadow:0 4px 12px rgba(236,72,153,0.4); }
+
 /* Midnight note */
 .midnight-note { text-align:center; font-size:11px; color:var(--muted); margin-top:12px; font-weight:700; padding:0 16px; }
 
@@ -512,19 +615,6 @@ body {
     </div>
   </div>
 
-  <!-- 残り時間 -->
-  <div style="margin:12px 16px 0;animation:slideUp 0.7s 0.5s ease both;">
-    <div style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(236,72,153,0.08));border:1.5px solid rgba(236,72,153,0.2);border-radius:20px;padding:12px 16px;text-align:center;">
-      <div style="font-size:9px;font-weight:900;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">ふたりでいられる残り時間</div>
-      <div style="display:flex;align-items:baseline;justify-content:center;gap:5px;margin-bottom:2px;">
-        <span id="days-left-num" style="font-family:'Pacifico',cursive;font-size:22px;background:linear-gradient(135deg,var(--ren),var(--siho));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;"></span>
-        <span style="font-size:11px;font-weight:900;color:var(--text);">日</span>
-      </div>
-      <div id="days-left-sec" style="font-size:12px;font-weight:900;color:var(--siho);letter-spacing:0.04em;font-family:'Nunito',sans-serif;"></div>
-      <div style="font-size:8px;color:var(--muted);margin-top:3px;letter-spacing:0.05em;">平均寿命81歳まで / 現在33歳</div>
-    </div>
-  </div>
-
   <!-- 家訓 -->
   <div class="kakun-wrap">
     <div class="kakun-header">家訓</div>
@@ -580,6 +670,29 @@ body {
 
   <!-- DAILY COMMENT -->
 
+  <!-- CHALLENGE -->
+  <div class="challenge-wrap" id="challenge-wrap">
+    <div class="challenge-title">チャレンジ</div>
+    <div class="challenge-row">
+      <div class="challenge-card ren-cc">
+        <div class="cc-icon">🚭</div>
+        <div class="cc-name">REN</div>
+        <div class="cc-label">禁煙</div>
+        <div class="cc-count" id="cc-ren-count">0</div>
+        <div class="cc-unit">日達成</div>
+        <button class="cc-btn ren-cb" id="cc-ren-btn" onclick="toggleChallenge('ren')">今日できた！</button>
+      </div>
+      <div class="challenge-card siho-cc">
+        <div class="cc-icon">💪</div>
+        <div class="cc-name">SHIHO</div>
+        <div class="cc-label">ダイエット</div>
+        <div class="cc-count" id="cc-siho-count">0</div>
+        <div class="cc-unit">日達成</div>
+        <button class="cc-btn siho-cb" id="cc-siho-btn" onclick="toggleChallenge('siho')">今日できた！</button>
+      </div>
+    </div>
+  </div>
+
   <!-- INLINE WAKE (top) -->
   <div class="inline-wake" id="inline-wake">
     <div class="inline-wake-title">起床チェック</div>
@@ -624,7 +737,8 @@ body {
     <button class="tab-btn"        id="tab-wake"    onclick="setView('wake')">起床</button>
     <button class="tab-btn"        id="tab-chart"   onclick="setView('chart')">グラフ</button>
     <button class="tab-btn"        id="tab-history" onclick="setView('history')">履歴</button>
-    <button class="tab-btn danger" onclick="resetToday()">リセット</button>
+    <button class="tab-btn danger" onclick="resetToday()">今日リセット</button>
+    <button class="tab-btn danger" onclick="resetAll()">累計リセット</button>
   </div>
 
   <!-- CHART VIEW -->
@@ -766,6 +880,7 @@ function dbGet(key) {
       _fbReady = true;
       render();
       renderWakeInline();
+      renderChallenge();
     });
   } catch(e) {
     console.error('Firebase初期化エラー:', e);
@@ -773,45 +888,33 @@ function dbGet(key) {
 })();
 
 const CHORES = [
-  { id: 'cooking',   label: '料理',            icon: '🍳', cat: '料理・食事' },
-  { id: 'dishes',    label: '皿洗い',          icon: '🍽️', cat: '料理・食事' },
-  { id: 'laundry',   label: '洗濯',            icon: '🧺', cat: '掃除・洗濯' },
-  { id: 'vacuum',    label: '掃除機',          icon: '🧹', cat: '掃除・洗濯' },
-  { id: 'bath',      label: 'お風呂掃除',      icon: '🛁', cat: '掃除・洗濯' },
-  { id: 'toilet',    label: 'トイレ掃除',      icon: '🚽', cat: '掃除・洗濯' },
-  { id: 'washroom',  label: '洗面台掃除',      icon: '🪥', cat: '掃除・洗濯' },
-  { id: 'trash',     label: 'ゴミ捨て',        icon: '🗑️', cat: '掃除・洗濯' },
-  { id: 'yoyo',      label: 'yoyoの着替え',    icon: '👕', cat: 'yoyoのこと' },
-  { id: 'yoyobath',  label: 'yoyoのお風呂',    icon: '🚿', cat: 'yoyoのこと' },
-  { id: 'hoikuen',   label: '保育園の送り迎え', icon: '🚌', cat: 'yoyoのこと' },
-  { id: 'bedtime',   label: 'yoyoの寝かしつけ',icon: '🌙', cat: 'yoyoのこと' },
-  { id: 'dog',       label: '犬の掃除と餌やり',icon: '🐶', cat: '犬のこと' },
-  { id: 'dogwalk',   label: '犬の散歩',        icon: '🦮', cat: '犬のこと' },
-  { id: 'doghouse',  label: '犬小屋の清掃',    icon: '🏠', cat: '犬のこと' },
+  // RENの毎日タスク
+  { id: 'laundry',   label: '洗濯',            icon: '🧺', cat: 'RENの毎日タスク' },
+  { id: 'dishes',    label: '皿洗い',          icon: '🍽️', cat: 'RENの毎日タスク' },
+  { id: 'vacuum',    label: '掃除機',          icon: '🧹', cat: 'RENの毎日タスク' },
+  { id: 'yoyo',      label: 'yoyoの着替え',    icon: '👕', cat: 'RENの毎日タスク' },
+  { id: 'yoyobath',  label: 'yoyoのお風呂',    icon: '🚿', cat: 'RENの毎日タスク' },
+  // SHIHOの毎日タスク
+  { id: 'yoyoprep',  label: 'yoyo身支度',      icon: '👶', cat: 'SHIHOの毎日タスク' },
+  { id: 'dog',       label: '犬の掃除と餌やり',icon: '🐶', cat: 'SHIHOの毎日タスク' },
+  // その他
+  { id: 'cooking',   label: '料理',            icon: '🍳', cat: 'その他' },
+  { id: 'stove',     label: 'コンロ掃除',      icon: '🔥', cat: 'その他' },
+  { id: 'bath',      label: 'お風呂掃除',      icon: '🛁', cat: 'その他' },
+  { id: 'toilet',    label: 'トイレ掃除',      icon: '🚽', cat: 'その他' },
+  { id: 'washroom',  label: '洗面台掃除',      icon: '🪥', cat: 'その他' },
+  { id: 'trash',     label: 'ゴミ捨て',        icon: '🗑️', cat: 'その他' },
+  { id: 'bedtime',   label: 'yoyoの寝かしつけ',icon: '🌙', cat: 'その他' },
+  { id: 'dogwalk',   label: '犬の散歩',        icon: '🦮', cat: 'その他' },
+  { id: 'doghouse',  label: '犬小屋の清掃',    icon: '🏠', cat: 'その他' },
   { id: 'weekend',   label: '休日の企画',      icon: '🗓️', cat: 'その他' },
+  { id: 'supplies',  label: '日用品・消耗品の補充', icon: '🛒', cat: 'その他' },
+  { id: 'bedding',   label: '寝具の洗濯',      icon: '🛏️', cat: 'その他' },
+  { id: 'floormop',  label: '床の拭き掃除',    icon: '🧽', cat: 'その他' },
+  { id: 'kitchwipe', label: 'キッチン全体の拭き掃除', icon: '✨', cat: 'その他' },
+  { id: 'grocery',   label: '食材の買い出し',   icon: '🥦', cat: 'その他' },
+  { id: 'trashbag',  label: 'ゴミ袋変える',    icon: '🗑️', cat: 'その他' },
 ];
-
-// ─── 残り日数 ────────────────────────────────────────────────────────────────
-(function() {
-  const birthYear = new Date().getFullYear() - 33;
-  const now0 = new Date();
-  const endDate = new Date(birthYear + 81, now0.getMonth(), now0.getDate());
-
-  function update() {
-    const now = new Date();
-    const diffMs = Math.max(0, endDate - now);
-    const days    = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours   = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-    const elDays = document.getElementById('days-left-num');
-    const elSec  = document.getElementById('days-left-sec');
-    if (elDays) elDays.textContent = days.toLocaleString();
-    if (elSec)  elSec.textContent  = `${Math.floor(diffMs / 1000).toLocaleString()} 秒`;
-  }
-  update();
-  setInterval(update, 1000);
-})();
 
 function getToday() {
   const d = new Date();
@@ -846,6 +949,7 @@ function loadData() {
   scheduleMidnight();
   updateCountdown();
   renderWakeInline();
+  renderChallenge();
 }
 
 function scheduleMidnight() {
@@ -898,6 +1002,7 @@ function unmarkChore(id, player) {
 
 function resetToday() {
   if (!confirm('今日の記録をリセットしますか？')) return;
+  if (!confirm('本当にリセットしますか？（元に戻せません）')) return;
   CHORES.forEach(c => {
     const v = todayData[c.id];
     if (!v) return;
@@ -910,8 +1015,23 @@ function resetToday() {
   render();
 }
 
+function resetAll() {
+  if (!confirm('すべての累計データをリセットしますか？\n（今日の記録・履歴・チャレンジすべて削除されます）')) return;
+  if (!confirm('本当に全データを削除しますか？\nこの操作は元に戻せません！')) return;
+  // Firebase全データ削除
+  fbDb.ref().set(null);
+  // ローカル状態もリセット
+  Object.keys(_cache).forEach(k => delete _cache[k]);
+  todayData = {};
+  totals = { ren: 0, siho: 0 };
+  render();
+  renderWakeInline();
+  renderChallenge();
+}
+
 function setView(v) {
   document.getElementById('chore-list').style.display          = v === 'today'   ? 'flex'  : 'none';
+  document.getElementById('challenge-wrap').style.display       = v === 'today'   ? ''      : 'none';
   document.getElementById('inline-wake').style.display         = v === 'today'   ? ''      : 'none';
   document.getElementById('history-view').style.display        = v === 'history' ? 'block' : 'none';
   document.getElementById('chart-view').style.display          = v === 'chart'   ? 'block' : 'none';
@@ -979,10 +1099,16 @@ function render() {
   const rt = totals.ren || 0, st = totals.siho || 0;
   const rT = getTodayPts('ren'), sT = getTodayPts('siho');
 
-  document.getElementById('ren-today-big').textContent  = rT;
-  document.getElementById('siho-today-big').textContent = sT;
-  document.getElementById('ren-total-sub').textContent  = `累計 ${rt}pt`;
-  document.getElementById('siho-total-sub').textContent = `累計 ${st}pt`;
+  document.getElementById('ren-today-big').textContent  = rt;
+  document.getElementById('siho-today-big').textContent = st;
+  document.getElementById('ren-total-sub').textContent  = `今日 +${rT}pt`;
+  document.getElementById('siho-total-sub').textContent = `今日 +${sT}pt`;
+
+  // TODAYラベルを累計に変更
+  const renLabel = document.getElementById('ren-today-big');
+  if (renLabel && renLabel.nextElementSibling) renLabel.nextElementSibling.textContent = '累計';
+  const sihoLabel = document.getElementById('siho-today-big');
+  if (sihoLabel && sihoLabel.nextElementSibling) sihoLabel.nextElementSibling.textContent = '累計';
 
   const total  = rt + st;
   const renPct = total === 0 ? 50 : Math.round((rt / total) * 100);
@@ -1017,15 +1143,57 @@ function render() {
   const listEl = document.getElementById('chore-list');
   listEl.innerHTML = '';
 
-  // group by category
-  const cats = [...new Set(CHORES.map(c => c.cat))];
+  // ─── 毎日タスク（REN / SHIHO 2列） ───
+  const renDaily  = CHORES.filter(c => c.cat === 'RENの毎日タスク');
+  const sihoDaily = CHORES.filter(c => c.cat === 'SHIHOの毎日タスク');
+  if (renDaily.length || sihoDaily.length) {
+    const dailyTitle = document.createElement('div');
+    dailyTitle.className = 'chore-cat-label';
+    dailyTitle.textContent = '毎日タスク';
+    listEl.appendChild(dailyTitle);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'daily-wrap';
+
+    [{ items: renDaily, player: 'ren', label: 'REN' }, { items: sihoDaily, player: 'siho', label: 'SHIHO' }].forEach(({ items, player, label }) => {
+      const allDone = items.length > 0 && items.every(c => (todayData[c.id] || {})[player] > 0);
+      const col = document.createElement('div');
+      col.className = 'daily-col' + (allDone ? ' all-done' : '');
+      const colLabel = document.createElement('div');
+      colLabel.className = 'daily-col-label ' + player + '-label';
+      colLabel.textContent = allDone ? label + ' ALL CLEAR!' : label;
+      col.appendChild(colLabel);
+      items.forEach(chore => {
+        const v = todayData[chore.id] || {};
+        const cnt = v[player] || 0;
+        const doneClass = cnt > 0 ? (' done-' + player) : '';
+        const card = document.createElement('div');
+        card.className = 'daily-card' + doneClass;
+        card.innerHTML = `
+          <span class="chore-icon">${chore.icon}</span>
+          <span class="chore-name">${chore.label}</span>
+          <button class="btn-player btn-${player}${cnt > 0 ? ' active' : ''}"
+            onclick="markChore('${chore.id}','${player}')"
+            oncontextmenu="event.preventDefault();unmarkChore('${chore.id}','${player}')">
+            ${cnt > 0 ? '✓' : label}${cnt > 1 ? `<span class="cnt-badge">${cnt}</span>` : ''}
+          </button>`;
+        col.appendChild(card);
+      });
+      wrap.appendChild(col);
+    });
+    listEl.appendChild(wrap);
+  }
+
+  // ─── その他 ───
+  const cats = [...new Set(CHORES.filter(c => !c.cat.includes('毎日タスク')).map(c => c.cat))];
   cats.forEach(cat => {
     const items = CHORES.filter(c => c.cat === cat);
+    const isOther = cat === 'その他';
     const section = document.createElement('div');
-    section.className = 'chore-category';
+    section.className = 'chore-category' + (isOther ? ' cat-other' : '');
     const catLabel = document.createElement('div');
     catLabel.className = 'chore-cat-label';
-    catLabel.textContent = cat;
+    catLabel.textContent = isOther ? 'その他（毎日必須ではない）' : cat;
     section.appendChild(catLabel);
     const grid = document.createElement('div');
     grid.className = 'chore-grid';
@@ -1060,6 +1228,48 @@ function render() {
   });
 }
 
+
+// ─── Challenge functions ─────────────────────────────────────────────────────
+
+function toggleChallenge(player) {
+  const today = getToday();
+  const data = dbGet('challenge-' + today) || {};
+  data[player] = !data[player];
+  dbSet('challenge-' + today, data);
+  // 日付リストも管理
+  let cdates = dbGet('challenge-dates') || [];
+  if (!cdates.includes(today)) {
+    cdates.push(today);
+    if (cdates.length > 366) cdates = cdates.slice(-366);
+    dbSet('challenge-dates', cdates);
+  }
+  renderChallenge();
+}
+
+function countChallengeDays(player) {
+  const dates = dbGet('challenge-dates') || [];
+  let count = 0;
+  dates.forEach(d => {
+    const data = dbGet('challenge-' + d) || {};
+    if (data[player]) count++;
+  });
+  return count;
+}
+
+function renderChallenge() {
+  const today = getToday();
+  const data = dbGet('challenge-' + today) || {};
+  ['ren', 'siho'].forEach(p => {
+    const countEl = document.getElementById('cc-' + p + '-count');
+    const btnEl = document.getElementById('cc-' + p + '-btn');
+    if (countEl) countEl.textContent = countChallengeDays(p);
+    if (btnEl) {
+      const done = !!data[p];
+      btnEl.textContent = done ? '✓ できた！' : '今日できた！';
+      btnEl.classList.toggle('checked', done);
+    }
+  });
+}
 
 // ─── Wake-up functions ──────────────────────────────────────────────────────
 
