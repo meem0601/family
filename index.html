@@ -703,8 +703,74 @@ body {
   <div class="midnight-note" id="midnight-note"></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
+
+// ─── Firebase設定（自分のプロジェクトの値に置き換えてください） ───
+const firebaseConfig = {
+  apiKey:            "AIzaSyBIHOi-fpIZq7X1cQG7yIMos4x0U6h_kfo",
+  authDomain:        "family-42f59.firebaseapp.com",
+  databaseURL:       "https://family-42f59-default-rtdb.firebaseio.com",
+  projectId:         "family-42f59",
+  storageBucket:     "family-42f59.firebasestorage.app",
+  messagingSenderId: "96493843025",
+  appId:             "1:96493843025:web:42c340cc9d32e826907e70"
+};
+
+firebase.initializeApp(firebaseConfig);
+const fbDb = firebase.database();
+
+// ─── Firebase同期レイヤー ───
+const _cache = {};
+let _fbReady = false;
+
+function dbSet(key, val) {
+  _cache[key] = val;
+  fbDb.ref(key).set(val);
+}
+
+function dbGet(key) {
+  return _cache.hasOwnProperty(key) ? _cache[key] : null;
+}
+
+// 初期化：localStorage → Firebase移行 + リアルタイム同期
+(async function initApp() {
+  try {
+    const snap = await fbDb.ref().once('value');
+    if (!snap.exists()) {
+      // 既存のlocalStorageデータをFirebaseに移行
+      const updates = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        try { updates[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+      }
+      if (Object.keys(updates).length > 0) {
+        await fbDb.ref().set(updates);
+      }
+    }
+
+    // リアルタイムリスナー（他端末の変更を即反映）
+    fbDb.ref().on('value', (snapshot) => {
+      const data = snapshot.val() || {};
+      // キャッシュを完全同期
+      Object.keys(_cache).forEach(k => { if (!(k in data)) delete _cache[k]; });
+      Object.keys(data).forEach(k => { _cache[k] = data[k]; });
+
+      const today = getToday();
+      todayData = dbGet('chores-' + today) || {};
+      const raw = dbGet('totals') || {};
+      totals = { ren: raw.ren || 0, siho: raw.siho || 0 };
+
+      _fbReady = true;
+      render();
+      renderWakeInline();
+    });
+  } catch(e) {
+    console.error('Firebase初期化エラー:', e);
+  }
+})();
 
 const CHORES = [
   { id: 'cooking',   label: '料理',            icon: '🍳', cat: '料理・食事' },
@@ -764,24 +830,18 @@ let midnightTimer = null;
 
 function saveData() {
   const today = getToday();
-  localStorage.setItem('chores-' + today, JSON.stringify(todayData));
-  localStorage.setItem('totals', JSON.stringify(totals));
-  let dates = [];
-  try { dates = JSON.parse(localStorage.getItem('hist-dates') || '[]'); } catch(e) {}
+  dbSet('chores-' + today, todayData);
+  dbSet('totals', totals);
+  let dates = dbGet('hist-dates') || [];
   if (!dates.includes(today)) {
     dates.push(today);
     if (dates.length > 366) dates = dates.slice(-366);
-    localStorage.setItem('hist-dates', JSON.stringify(dates));
+    dbSet('hist-dates', dates);
   }
 }
 
 function loadData() {
-  const today = getToday();
-  try { todayData = JSON.parse(localStorage.getItem('chores-' + today) || '{}'); } catch(e) { todayData = {}; }
-  try {
-    const raw = JSON.parse(localStorage.getItem('totals') || '{}');
-    totals = { ren: raw.ren || 0, siho: raw.siho || raw.shiho || 0 };
-  } catch(e) { totals = { ren: 0, siho: 0 }; }
+  // まず初期描画（Firebaseからデータが届いたら上書きされる）
   render();
   scheduleMidnight();
   updateCountdown();
@@ -845,8 +905,8 @@ function resetToday() {
     totals.siho = Math.max(0, totals.siho - (v.siho || 0));
   });
   todayData = {};
-  localStorage.setItem('chores-' + getToday(), JSON.stringify({}));
-  localStorage.setItem('totals', JSON.stringify(totals));
+  dbSet('chores-' + getToday(), {});
+  dbSet('totals', totals);
   render();
 }
 
@@ -869,7 +929,7 @@ function setView(v) {
 function renderHistory() {
   const el = document.getElementById('history-view');
   let dates = [];
-  try { dates = JSON.parse(localStorage.getItem('hist-dates') || '[]'); } catch(e) {}
+  dates = dbGet('hist-dates') || [];
   if (!dates.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">まだ記録なし</div>'; return; }
 
   const sorted = [...dates].sort().reverse();
@@ -886,8 +946,7 @@ function renderHistory() {
     let renM = 0, sihoM = 0;
     let rows = '';
     for (const date of byMonth[mKey]) {
-      let dd = {};
-      try { dd = JSON.parse(localStorage.getItem('chores-' + date) || '{}'); } catch(e) {}
+      let dd = dbGet('chores-' + date) || {};
       const rp = CHORES.reduce((s,c) => s + (dd[c.id] && dd[c.id].ren  ? 1 : 0), 0);
       const sp = CHORES.reduce((s,c) => s + (dd[c.id] && dd[c.id].siho ? 1 : 0), 0);
       renM += rp; sihoM += sp;
@@ -1005,18 +1064,17 @@ function render() {
 // ─── Wake-up functions ──────────────────────────────────────────────────────
 
 function saveWake(date, data) {
-  localStorage.setItem('wake-' + date, JSON.stringify(data));
-  let wdates = [];
-  try { wdates = JSON.parse(localStorage.getItem('wake-dates') || '[]'); } catch(e) {}
+  dbSet('wake-' + date, data);
+  let wdates = dbGet('wake-dates') || [];
   if (!wdates.includes(date)) {
     wdates.push(date);
     if (wdates.length > 366) wdates = wdates.slice(-366);
-    localStorage.setItem('wake-dates', JSON.stringify(wdates));
+    dbSet('wake-dates', wdates);
   }
 }
 
 function getWake(date) {
-  try { return JSON.parse(localStorage.getItem('wake-' + date) || '{}'); } catch(e) { return {}; }
+  return dbGet('wake-' + date) || {};
 }
 
 function saveWakeTime(player, value) {
@@ -1108,7 +1166,7 @@ function renderWakeHistory() {
   const el = document.getElementById('wake-hist-list');
   if (!el) return;
   let dates = [];
-  try { dates = JSON.parse(localStorage.getItem('wake-dates') || '[]'); } catch(e) {}
+  dates = dbGet('wake-dates') || [];
   if (!dates.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">まだ記録なし</div>'; return; }
 
   if (wakePeriod === 'month') {
